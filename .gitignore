@@ -4,4 +4,7 @@
 *.log
 .~lock.*
 tags
+django_validated_file.egg-info
+versiontools-1.9.1-py2.7.egg
+
 
