@@ -71,3 +71,15 @@ class ValidatedFileFieldTest(TestCase):
         self.assertEqual(len(form.errors), 1)
         self.assertEqual(len(form.errors['the_file']), 1)
 
+
+    def test_form_invalid_size(self):
+        uploaded_file = SimpleUploadedFile(
+                name = 'the_file.pdf',
+                content = self._get_sample_file('image15k.png').read(),
+                content_type = 'image/png',
+            )
+        form = TestModelForm(data = {}, files = {'the_file': uploaded_file})
+        self.assertFalse(form.is_valid())
+        self.assertEqual(len(form.errors), 1)
+        self.assertEqual(len(form.errors['the_file']), 1)
+

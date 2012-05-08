@@ -1,5 +1,6 @@
 from django.db import models
 from django import forms
+from django.template.defaultfilters import filesizeformat
 from django.utils.translation import ugettext as _
 
 class ValidatedFileField(models.FileField):
