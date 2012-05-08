@@ -1,5 +1,7 @@
 import os
 
+PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
+
 DEBUG = True
 
 AUTHNET_LOGIN_ID = ''
@@ -47,4 +49,8 @@ SITE_ID = 1
 TEMPLATE_DIRS = [os.path.join(os.path.dirname(__file__), 'templates')]
 
 USE_I18N = True
+
+MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'media')
+
+MEDIA_URL = '/media/'
 
