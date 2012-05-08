@@ -7,6 +7,6 @@ class TestModel(models.Model):
                     null = True,
                     blank = True,
                     upload_to = 'testfile',
-                    content_types = 'image/png',
+                    content_types = ['image/png'],
                     max_upload_size = 10240)
 

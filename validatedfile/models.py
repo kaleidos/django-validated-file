@@ -1,6 +1,8 @@
-from django.db.models import FileField
+from django.db import models
+from django import forms
+from django.utils.translation import ugettext as _
 
-class ValidatedFileField(FileField):
+class ValidatedFileField(models.FileField):
     def __init__(self, *args, **kwargs):
         self.content_types = kwargs.pop("content_types")
         self.max_upload_size = kwargs.pop("max_upload_size")
@@ -16,7 +18,7 @@ class ValidatedFileField(FileField):
                 if file._size > self.max_upload_size:
                     raise forms.ValidationError(_('Please keep filesize under %s. Current filesize %s') % (filesizeformat(self.max_upload_size), filesizeformat(file._size)))
             else:
-                raise forms.ValidationError(_('Filetype not supported.'))
+                raise forms.ValidationError(_('Filetype %s not supported.') % (file.content_type))
         except AttributeError:
             pass        
 
