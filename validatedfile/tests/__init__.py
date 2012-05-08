@@ -5,26 +5,12 @@ from django.conf import settings
 
 import os.path
 
-from models import TestModel
-from forms import TestModelForm
+from models import TestModel, TestModelNoValidate
+from forms import TestModelForm, TestModelNoValidateForm
 
 class ValidatedFileFieldTest(TestCase):
 
     SAMPLE_FILES_PATH = 'validatedfile/tests/sample_files'
-
-
-    def _get_sample_file(self, filename):
-        path = os.path.join(self.SAMPLE_FILES_PATH, filename)
-        return open(path)
-
-
-    def _check_file_url(self, filefield, filename):
-        url = os.path.join(settings.MEDIA_URL, filefield.field.upload_to, filename)
-        self.assertEqual(filefield.url, url)
-
-        
-    def _get_file_url(self, filename):
-        return os.path.join(MEDIA_ROOT, prefix, filename)
 
 
     def test_create_empty_instance(self):
@@ -40,11 +26,12 @@ class ValidatedFileFieldTest(TestCase):
 
         self._check_file_url(instance.the_file, 'the_file.png')
 
+        from ipdb import set_trace; set_trace()
         instance.the_file.delete()
         instance.delete()
 
 
-    def test_form(self):
+    def test_form_ok(self):
         uploaded_file = SimpleUploadedFile(
                 name = 'the_file.png',
                 content = self._get_sample_file('image2k.png').read(),
@@ -60,21 +47,9 @@ class ValidatedFileFieldTest(TestCase):
         instance.delete()
 
 
-    def test_form_invalid_filetype(self):
-        uploaded_file = SimpleUploadedFile(
-                name = 'the_file.pdf',
-                content = self._get_sample_file('document.pdf').read(),
-                content_type = 'apllication/pdf',
-            )
-        form = TestModelForm(data = {}, files = {'the_file': uploaded_file})
-        self.assertFalse(form.is_valid())
-        self.assertEqual(len(form.errors), 1)
-        self.assertEqual(len(form.errors['the_file']), 1)
-
-
     def test_form_invalid_size(self):
         uploaded_file = SimpleUploadedFile(
-                name = 'the_file.pdf',
+                name = 'the_file.png',
                 content = self._get_sample_file('image15k.png').read(),
                 content_type = 'image/png',
             )
@@ -82,4 +57,70 @@ class ValidatedFileFieldTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertEqual(len(form.errors), 1)
         self.assertEqual(len(form.errors['the_file']), 1)
+
+
+    def test_form_invalid_filetype(self):
+        uploaded_file = SimpleUploadedFile(
+                name = 'the_file.pdf',
+                content = self._get_sample_file('document1k.pdf').read(),
+                content_type = 'application/pdf',
+            )
+        form = TestModelForm(data = {}, files = {'the_file': uploaded_file})
+        self.assertFalse(form.is_valid())
+        self.assertEqual(len(form.errors), 1)
+        self.assertEqual(len(form.errors['the_file']), 1)
+
+
+    def test_form_invalid_filetype_and_size(self):
+        uploaded_file = SimpleUploadedFile(
+                name = 'the_file.pdf',
+                content = self._get_sample_file('document15k.pdf').read(),
+                content_type = 'application/pdf',
+            )
+        form = TestModelForm(data = {}, files = {'the_file': uploaded_file})
+        self.assertFalse(form.is_valid())
+        self.assertEqual(len(form.errors), 1)
+        self.assertEqual(len(form.errors['the_file']), 1)
+
+
+    def test_form_fake_filetype(self):
+        uploaded_file = SimpleUploadedFile(
+                name = 'the_file.png',
+                content = self._get_sample_file('document1k.pdf').read(),
+                content_type = 'image/png',
+            )
+        form = TestModelForm(data = {}, files = {'the_file': uploaded_file})
+        self.assertFalse(form.is_valid())
+        self.assertEqual(len(form.errors), 1)
+        self.assertEqual(len(form.errors['the_file']), 1)
+
+
+    def test_form_no_validate(self):
+        uploaded_file = SimpleUploadedFile(
+                name = 'the_file.pdf',
+                content = self._get_sample_file('document15k.pdf').read(),
+                content_type = 'application/pdf',
+            )
+        form = TestModelNoValidateForm(data = {}, files = {'the_file': uploaded_file})
+        self.assertTrue(form.is_valid())
+        instance = form.save()
+
+        self._check_file_url(instance.the_file, 'the_file.pdf')
+
+        instance.the_file.delete()
+        instance.delete()
+
+
+    def _get_sample_file(self, filename):
+        path = os.path.join(self.SAMPLE_FILES_PATH, filename)
+        return open(path)
+
+
+    def _check_file_url(self, filefield, filename):
+        url = os.path.join(settings.MEDIA_URL, filefield.field.upload_to, filename)
+        self.assertEqual(filefield.url, url)
+
+        
+    def _get_file_url(self, filename):
+        return os.path.join(MEDIA_ROOT, prefix, filename)
 

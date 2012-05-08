@@ -10,3 +10,9 @@ class TestModel(models.Model):
                     content_types = ['image/png'],
                     max_upload_size = 10240)
 
+class TestModelNoValidate(models.Model):
+    the_file = ValidatedFileField(
+                    null = True,
+                    blank = True,
+                    upload_to = 'testfile')
+
