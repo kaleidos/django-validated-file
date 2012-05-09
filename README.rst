@@ -16,8 +16,7 @@ Usage
 
 Create a model and add a field of type ValidatedFileField. You can add a maximum size in bytes
 and a list of valid mime types that will be allowed. The list of all mime types is available
-here: http://www.iana.org/assignments/media-types/index.html. If a user tries to upload a file
-with too much size or without a valid type, a form validation error will occur::
+here: http://www.iana.org/assignments/media-types/index.html::
 
     class TestModel(models.Model):
         the_file = ValidatedFileField(
@@ -26,4 +25,24 @@ with too much size or without a valid type, a form validation error will occur::
                         upload_to = 'testfile',
                         max_upload_size = 10240,
                         content_types = ['image/png'])
+
+The model can be used in forms or model forms like a normal FileField. If a user tries to upload
+a file with too much size or without a valid type, a form validation error will occur.
+
+
+Note on DOS attacks
+-------------------
+
+Important note: the check of the file size is made by Django once the whole file has been uploaded
+to the server and stored in a temp directory (or in memory if the file is small). Thus, this is
+useful to guarantee the quota of the users, for example, but will not stop an attacking user that
+wants to block the server by sending huge files (e. g. of several Gb).
+
+To avoid this, you need to configure your front end to limit the size of uploaded files. How to do
+it depends on the software you are using. For example, if you use apache, you should use
+**LimitRequestBody** directive (http://httpd.apache.org/docs/2.2/mod/core.html#limitrequestbody).
+
+This is a complementary measure, because you'll usually want normal users that exceed the size by a
+reasonable amount to get a friendly form validation message, while attacking users will see how their
+connection is abruptly cut before the file finishes uploading.  
 
