@@ -13,9 +13,9 @@ class ValidatedFileField(models.FileField):
 
     def clean(self, *args, **kwargs):        
         data = super(ValidatedFileField, self).clean(*args, **kwargs)
+        file = data.file
 
         if self.content_types:
-            file = data.file
             content_type_headers = getattr(file, 'content_type', '')
 
             mg = magic.Magic(mime = True)

@@ -26,7 +26,6 @@ class ValidatedFileFieldTest(TestCase):
 
         self._check_file_url(instance.the_file, 'the_file.png')
 
-        from ipdb import set_trace; set_trace()
         instance.the_file.delete()
         instance.delete()
 
@@ -110,6 +109,18 @@ class ValidatedFileFieldTest(TestCase):
         instance.the_file.delete()
         instance.delete()
 
+
+    def test_form_null_file(self):
+        form = TestModelNoValidateForm(data = {}, files = {})
+        self.assertTrue(form.is_valid())
+        instance = form.save()
+
+        self.assertEqual(instance.the_file, None)
+
+        instance.delete()
+
+
+    # Utilities
 
     def _get_sample_file(self, filename):
         path = os.path.join(self.SAMPLE_FILES_PATH, filename)
