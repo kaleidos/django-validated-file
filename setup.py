@@ -21,6 +21,7 @@ setup(
     ],
     setup_requires = [
         'versiontools >= 1.8',
+        'python-magic >= 0.4.2',
     ],
     classifiers = [
         "Programming Language :: Python",
