@@ -123,8 +123,10 @@ class ValidatedFileFieldTest(TestCase):
     def test_quota_empty(self):
         container = TestContainer.objects.create(name = 'container1')
 
-        quota = FileQuota(container.test_elements.all(), 'the_file')
-        self.assertEqual(quota.current_usage(), 0)
+        quota = FileQuota()
+        quota.update(container.test_elements.all(), 'the_file')
+        self.assertEqual(quota.current_usage, 0)
+        self.assertFalse(quota.exceeds())
 
         container.delete()
 
@@ -136,8 +138,10 @@ class ValidatedFileFieldTest(TestCase):
                 the_file = File(self._get_sample_file('image2k.png'), 'the_file.png')
             )
 
-        quota = FileQuota(container.test_elements.all(), 'the_file')
-        self.assertEqual(quota.current_usage(), 2120)
+        quota = FileQuota()
+        quota.update(container.test_elements.all(), 'the_file')
+        self.assertEqual(quota.current_usage, 2120)
+        self.assertFalse(quota.exceeds())
 
         element.the_file.delete()
         element.delete()
@@ -160,8 +164,10 @@ class ValidatedFileFieldTest(TestCase):
                 the_file = File(self._get_sample_file('document15k.pdf'), 'the_file3.pdf')
             )
 
-        quota = FileQuota(container1.test_elements.all(), 'the_file')
-        self.assertEqual(quota.current_usage(), 16706)
+        quota = FileQuota(max_usage = 20000)
+        quota.update(container1.test_elements.all(), 'the_file')
+        self.assertEqual(quota.current_usage, 16706)
+        self.assertFalse(quota.exceeds())
 
         element1.the_file.delete()
         element2.the_file.delete()
@@ -173,10 +179,50 @@ class ValidatedFileFieldTest(TestCase):
         container2.delete()
 
 
+    def test_quota_exceeds(self):
+        quota = FileQuota(max_usage = 1000)
+
+        container = TestContainer.objects.create(name = 'container1')
+        quota.update(container.test_elements.all(), 'the_file')
+        self.assertEqual(quota.current_usage, 0)
+        self.assertFalse(quota.exceeds())
+        self.assertTrue(quota.exceeds(2120))
+
+        element = TestElement.objects.create(
+                container = container,
+                the_file = File(self._get_sample_file('image2k.png'), 'the_file.png')
+            )
+        quota.update(container.test_elements.all(), 'the_file')
+        self.assertEqual(quota.current_usage, 2120)
+        self.assertTrue(quota.exceeds())
+
+        element.the_file.delete()
+        element.delete()
+        container.delete()
+
+
+    def test_form_quota_check(self):
+        container = TestContainer.objects.create(name = 'container1')
+
+        form1 = TestElementForm(container = container)
+        self.assertFalse(form1.exceeds_quota())
+
+        element = TestElement.objects.create(
+                container = container,
+                the_file = File(self._get_sample_file('image15k.png'), 'the_file.png')
+            )
+
+        form2 = TestElementForm(container = container)
+        self.assertTrue(form2.exceeds_quota())
+
+        element.the_file.delete()
+        element.delete()
+        container.delete()
+
+
     def test_form_quota_ok(self):
         container = TestContainer.objects.create(name = 'container1')
 
-        quota = FileQuota(container.test_elements.all(), 'the_file')
         uploaded_file = SimpleUploadedFile(
                 name = 'the_file.png',
                 content = self._get_sample_file('image2k.png').read(),
@@ -184,7 +230,6 @@ class ValidatedFileFieldTest(TestCase):
             )
         form = TestElementForm(
                 container = container,
-                quota = quota,
                 data = {},
                 files = {'the_file': uploaded_file}
             )
@@ -201,7 +246,6 @@ class ValidatedFileFieldTest(TestCase):
                 the_file = File(self._get_sample_file('image2k.png'), 'the_file.png')
             )
 
-        quota = FileQuota(container.test_elements.all(), 'the_file')
         uploaded_file = SimpleUploadedFile(
                 name = 'the_file.png',
                 content = self._get_sample_file('image15k.png').read(),
@@ -209,7 +253,6 @@ class ValidatedFileFieldTest(TestCase):
             )
         form = TestElementForm(
                 container = container,
-                quota = quota,
                 data = {},
                 files = {'the_file': uploaded_file}
             )

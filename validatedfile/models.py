@@ -34,29 +34,66 @@ class ValidatedFileField(models.FileField):
 
 
 class FileQuota(object):
-    def __init__(self, items = [], file_attr_name = None):
-        self.items = items
-        self.file_attr_name = file_attr_name
 
-    def current_usage(self):
-        usage = 0
-        for item in self.items:
-            the_file = getattr(item, self.file_attr_name, None)
-            if the_file:
-                usage += the_file.size
-        return usage
-
-class QuotaValidator(object):
-    def __init__(self, max_usage):
-        self.quota = FileQuota()
+    def __init__(self, max_usage = -1):
+        self.current_usage = 0
         self.max_usage = max_usage
 
-    def set_quota(self, quota):
-        self.quota = quota
+    def update(self, items, attr_name):
+        self.current_usage = 0
+        for item in items:
+            the_file = getattr(item, attr_name, None)
+            if the_file:
+                self.current_usage += the_file.size
+
+    def exceeds(self, size = 0):
+        if self.max_usage >= 0:
+            return (self.current_usage + size > self.max_usage)
+        else:
+            return False
+
+
+class QuotaValidator(object):
+
+    def __init__(self, max_usage):
+        self.quota = FileQuota(max_usage)
+
+    def update_quota(self, items, attr_name):
+        self.quota.update(items, attr_name)
 
     def __call__(self, file):
-        tried_usage = self.quota.current_usage() + file.size
-        if tried_usage > self.max_usage:
+        file_size = file.size
+        if self.quota.exceeds(file_size):
             raise forms.ValidationError(_('Please keep the total uploaded files under %s. With this file, the total would be %s' %
-                                   (filesizeformat(self.max_usage), filesizeformat(tried_usage))))
-        
+                                   (filesizeformat(self.quota.max_usage),
+                                    filesizeformat(self.quota.current_usage + file_size))))
+ 
+
+#
+#
+#    def __init__(self, items = [], file_attr_name = None):
+#        self.items = items
+#        self.file_attr_name = file_attr_name
+#
+#    def current_usage(self):
+#        usage = 0
+#        for item in self.items:
+#            the_file = getattr(item, self.file_attr_name, None)
+#            if the_file:
+#                usage += the_file.size
+#        return usage
+#
+#class QuotaValidator(object):
+#    def __init__(self, max_usage):
+#        self.quota = FileQuota()
+#        self.max_usage = max_usage
+#
+#    def set_quota(self, quota):
+#        self.quota = quota
+#
+#    def __call__(self, file):
+#        tried_usage = self.quota.current_usage() + file.size
+#        if tried_usage > self.max_usage:
+#            raise forms.ValidationError(_('Please keep the total uploaded files under %s. With this file, the total would be %s' %
+#                                   (filesizeformat(self.max_usage), filesizeformat(tried_usage))))
+#        

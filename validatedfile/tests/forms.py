@@ -23,10 +23,16 @@ class TestElementForm(forms.ModelForm):
         model = TestElement
         fields = ['the_file']
 
-    def __init__(self, container, quota, *args, **kwargs):
+    def __init__(self, container, *args, **kwargs):
         super(TestElementForm, self).__init__(*args, **kwargs)
         self.container = container
-        self.fields['the_file'].validators[0].set_quota(quota)
+        self.fields['the_file'].validators[0].update_quota(
+                items = self.container.test_elements.all(),
+                attr_name = 'the_file',
+            )
+
+    def exceeds_quota(self):
+        return self.fields['the_file'].validators[0].quota.exceeds()
 
     def save(self, *args, **kwargs):
         element = super(TestElementForm, self).save(commit = False)
