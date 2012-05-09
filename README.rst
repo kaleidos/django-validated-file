@@ -18,6 +18,9 @@ Create a model and add a field of type ValidatedFileField. You can add a maximum
 and a list of valid mime types that will be allowed. The list of all mime types is available
 here: http://www.iana.org/assignments/media-types/index.html::
 
+    from django.db import models
+    from validatedfile.models import ValidatedFileField
+
     class TestModel(models.Model):
         the_file = ValidatedFileField(
                         null = True,
@@ -44,6 +47,6 @@ it depends on the software you are using. For example, if you use apache, you sh
 
 This is a complementary measure, because you'll usually want normal users that exceed the size by a
 reasonable amount to get a friendly form validation message, while attacking users will see how their
-connection is abruptly cut before the file finishes uploading. So the recommended setting is to have
+connection is abruptly cut before the file finishes uploading. So the recommended setting is to give
 max_upload_size a small value (e.g. 5Mb) and LimitRequestBody a higher one (e.g. 100Mb).
 
