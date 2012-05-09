@@ -31,12 +31,10 @@ class ValidatedFileFieldTest(TestCase):
 
 
     def test_form_ok(self):
-        uploaded_file = SimpleUploadedFile(
-                name = 'the_file.png',
-                content = self._get_sample_file('image2k.png').read(),
-                content_type = 'image/png',
-            )
-        form = TestModelForm(data = {}, files = {'the_file': uploaded_file})
+        form = self._create_bound_test_model_form(form_class = TestModelForm,
+                                                  orig_filename = 'image2k.png',
+                                                  dest_filename = 'the_file.png',
+                                                  content_type = 'image/png')
         self.assertTrue(form.is_valid())
         instance = form.save()
 
@@ -45,62 +43,55 @@ class ValidatedFileFieldTest(TestCase):
         instance.the_file.delete()
         instance.delete()
 
-
     def test_form_invalid_size(self):
-        uploaded_file = SimpleUploadedFile(
-                name = 'the_file.png',
-                content = self._get_sample_file('image15k.png').read(),
-                content_type = 'image/png',
-            )
-        form = TestModelForm(data = {}, files = {'the_file': uploaded_file})
+        form = self._create_bound_test_model_form(form_class = TestModelForm,
+                                                  orig_filename = 'image15k.png',
+                                                  dest_filename = 'the_file.png',
+                                                  content_type = 'image/png')
         self.assertFalse(form.is_valid())
         self.assertEqual(len(form.errors), 1)
         self.assertEqual(len(form.errors['the_file']), 1)
+        self.assertEqual(form.errors['the_file'][0], u'Please keep filesize under 10.0 KB. Current filesize 14.2 KB')
 
 
     def test_form_invalid_filetype(self):
-        uploaded_file = SimpleUploadedFile(
-                name = 'the_file.pdf',
-                content = self._get_sample_file('document1k.pdf').read(),
-                content_type = 'application/pdf',
-            )
-        form = TestModelForm(data = {}, files = {'the_file': uploaded_file})
+        form = self._create_bound_test_model_form(form_class = TestModelForm,
+                                                  orig_filename = 'document1k.pdf',
+                                                  dest_filename = 'the_file.pdf',
+                                                  content_type = 'application/pdf')
         self.assertFalse(form.is_valid())
         self.assertEqual(len(form.errors), 1)
         self.assertEqual(len(form.errors['the_file']), 1)
+        self.assertEqual(form.errors['the_file'][0], u'Filetype application/pdf not supported.')
 
 
     def test_form_invalid_filetype_and_size(self):
-        uploaded_file = SimpleUploadedFile(
-                name = 'the_file.pdf',
-                content = self._get_sample_file('document15k.pdf').read(),
-                content_type = 'application/pdf',
-            )
-        form = TestModelForm(data = {}, files = {'the_file': uploaded_file})
+        form = self._create_bound_test_model_form(form_class = TestModelForm,
+                                                  orig_filename = 'document15k.pdf',
+                                                  dest_filename = 'the_file.pdf',
+                                                  content_type = 'application/pdf')
         self.assertFalse(form.is_valid())
         self.assertEqual(len(form.errors), 1)
         self.assertEqual(len(form.errors['the_file']), 1)
+        self.assertEqual(form.errors['the_file'][0], u'Filetype application/pdf not supported.')
 
 
     def test_form_fake_filetype(self):
-        uploaded_file = SimpleUploadedFile(
-                name = 'the_file.png',
-                content = self._get_sample_file('document1k.pdf').read(),
-                content_type = 'image/png',
-            )
-        form = TestModelForm(data = {}, files = {'the_file': uploaded_file})
+        form = self._create_bound_test_model_form(form_class = TestModelForm,
+                                                  orig_filename = 'document1k.pdf',
+                                                  dest_filename = 'the_file.pdf',
+                                                  content_type = 'image/png')
         self.assertFalse(form.is_valid())
         self.assertEqual(len(form.errors), 1)
         self.assertEqual(len(form.errors['the_file']), 1)
+        self.assertEqual(form.errors['the_file'][0], u'Filetype application/pdf not supported.')
 
 
     def test_form_no_validate(self):
-        uploaded_file = SimpleUploadedFile(
-                name = 'the_file.pdf',
-                content = self._get_sample_file('document15k.pdf').read(),
-                content_type = 'application/pdf',
-            )
-        form = TestModelNoValidateForm(data = {}, files = {'the_file': uploaded_file})
+        form = self._create_bound_test_model_form(form_class = TestModelNoValidateForm,
+                                                  orig_filename = 'document15k.pdf',
+                                                  dest_filename = 'the_file.pdf',
+                                                  content_type = 'application/pdf')
         self.assertTrue(form.is_valid())
         instance = form.save()
 
@@ -111,7 +102,7 @@ class ValidatedFileFieldTest(TestCase):
 
 
     def test_form_null_file(self):
-        form = TestModelNoValidateForm(data = {}, files = {})
+        form = self._create_bound_test_model_form(form_class = TestModelNoValidateForm)
         self.assertTrue(form.is_valid())
         instance = form.save()
 
@@ -121,7 +112,7 @@ class ValidatedFileFieldTest(TestCase):
 
 
     def test_quota_empty(self):
-        container = TestContainer.objects.create(name = 'container1')
+        container = self._create_container(name = 'container1')
 
         quota = FileQuota()
         quota.update(container.test_elements.all(), 'the_file')
@@ -132,11 +123,10 @@ class ValidatedFileFieldTest(TestCase):
 
 
     def test_quota_one_file(self):
-        container = TestContainer.objects.create(name = 'container1')
-        element = TestElement.objects.create(
-                container = container,
-                the_file = File(self._get_sample_file('image2k.png'), 'the_file.png')
-            )
+        container = self._create_container(name = 'container')
+        element = self._add_element(container = container,
+                                    orig_filename = 'image2k.png',
+                                    dest_filename = 'the_file.png')
 
         quota = FileQuota()
         quota.update(container.test_elements.all(), 'the_file')
@@ -149,20 +139,17 @@ class ValidatedFileFieldTest(TestCase):
 
 
     def test_quota_several_files_several_containers(self):
-        container1 = TestContainer.objects.create(name = 'container1')
-        element1 = TestElement.objects.create(
-                container = container1,
-                the_file = File(self._get_sample_file('image2k.png'), 'the_file1.png')
-            )
-        element2 = TestElement.objects.create(
-                container = container1,
-                the_file = File(self._get_sample_file('image15k.png'), 'the_file2.png')
-            )
-        container2 = TestContainer.objects.create(name = 'container2')
-        element3 = TestElement.objects.create(
-                container = container2,
-                the_file = File(self._get_sample_file('document15k.pdf'), 'the_file3.pdf')
-            )
+        container1 = self._create_container(name = 'container1')
+        element1 = self._add_element(container = container1,
+                                     orig_filename = 'image2k.png',
+                                     dest_filename = 'the_file1.png')
+        element2 = self._add_element(container = container1,
+                                     orig_filename = 'image15k.png',
+                                     dest_filename = 'the_file2.png')
+        container2 = self._create_container(name = 'container2')
+        element3 = self._add_element(container = container2,
+                                     orig_filename = 'document15k.pdf',
+                                     dest_filename = 'the_file3.pdf')
 
         quota = FileQuota(max_usage = 20000)
         quota.update(container1.test_elements.all(), 'the_file')
@@ -182,16 +169,15 @@ class ValidatedFileFieldTest(TestCase):
     def test_quota_exceeds(self):
         quota = FileQuota(max_usage = 1000)
 
-        container = TestContainer.objects.create(name = 'container1')
+        container = self._create_container(name = 'container1')
         quota.update(container.test_elements.all(), 'the_file')
         self.assertEqual(quota.current_usage, 0)
         self.assertFalse(quota.exceeds())
         self.assertTrue(quota.exceeds(2120))
 
-        element = TestElement.objects.create(
-                container = container,
-                the_file = File(self._get_sample_file('image2k.png'), 'the_file.png')
-            )
+        element = self._add_element(container = container,
+                                    orig_filename = 'image2k.png',
+                                    dest_filename = 'the_file.png')
         quota.update(container.test_elements.all(), 'the_file')
         self.assertEqual(quota.current_usage, 2120)
         self.assertTrue(quota.exceeds())
@@ -202,17 +188,16 @@ class ValidatedFileFieldTest(TestCase):
 
 
     def test_form_quota_check(self):
-        container = TestContainer.objects.create(name = 'container1')
+        container = self._create_container(name = 'container1')
 
-        form1 = TestElementForm(container = container)
+        form1 = self._create_unbound_test_element_form(container = container)
         self.assertFalse(form1.exceeds_quota())
 
-        element = TestElement.objects.create(
-                container = container,
-                the_file = File(self._get_sample_file('image15k.png'), 'the_file.png')
-            )
+        element = self._add_element(container = container,
+                                    orig_filename = 'image15k.png',
+                                    dest_filename = 'the_file.png')
 
-        form2 = TestElementForm(container = container)
+        form2 = self._create_unbound_test_element_form(container = container)
         self.assertTrue(form2.exceeds_quota())
 
         element.the_file.delete()
@@ -221,43 +206,32 @@ class ValidatedFileFieldTest(TestCase):
 
 
     def test_form_quota_ok(self):
-        container = TestContainer.objects.create(name = 'container1')
+        container = self._create_container(name = 'container1')
 
-        uploaded_file = SimpleUploadedFile(
-                name = 'the_file.png',
-                content = self._get_sample_file('image2k.png').read(),
-                content_type = 'image/png',
-            )
-        form = TestElementForm(
-                container = container,
-                data = {},
-                files = {'the_file': uploaded_file}
-            )
-
+        form = self._create_bound_test_element_form(container = container,
+                                                    orig_filename = 'image2k.png',
+                                                    dest_filename = 'the_file.png',
+                                                    content_type = 'image/png')
         self.assertTrue(form.is_valid())
 
         container.delete()
 
 
     def test_form_quota_exceeded(self):
-        container = TestContainer.objects.create(name = 'container1')
-        element = TestElement.objects.create(
-                container = container,
-                the_file = File(self._get_sample_file('image2k.png'), 'the_file.png')
-            )
+        container = self._create_container(name = 'container1')
+        element = self._add_element(container = container,
+                                    orig_filename = 'image2k.png',
+                                    dest_filename = 'the_file.png')
 
-        uploaded_file = SimpleUploadedFile(
-                name = 'the_file.png',
-                content = self._get_sample_file('image15k.png').read(),
-                content_type = 'image/png',
-            )
-        form = TestElementForm(
-                container = container,
-                data = {},
-                files = {'the_file': uploaded_file}
-            )
-
+        form = self._create_bound_test_element_form(container = container,
+                                                    orig_filename = 'image15k.png',
+                                                    dest_filename = 'the_file.png',
+                                                    content_type = 'image/png')
         self.assertFalse(form.is_valid())
+        self.assertEqual(len(form.errors), 1)
+        self.assertEqual(len(form.errors['the_file']), 1)
+        self.assertEqual(form.errors['the_file'][0],
+                u'Please keep the total uploaded files under 9.8 KB. With this file, the total would be 16.3 KB')
 
         element.the_file.delete()
         element.delete()
@@ -278,4 +252,48 @@ class ValidatedFileFieldTest(TestCase):
         
     def _get_file_url(self, filename):
         return os.path.join(MEDIA_ROOT, prefix, filename)
+
+
+    def _create_bound_test_model_form(self, form_class, orig_filename = None,
+                                      dest_filename = None, content_type = None):
+        if orig_filename and dest_filename and content_type:
+            uploaded_file = SimpleUploadedFile(
+                    name = dest_filename,
+                    content = self._get_sample_file(orig_filename).read(),
+                    content_type = content_type,
+                )
+            files = {'the_file': uploaded_file}
+        else:
+            files = {}
+        form = form_class(data = {}, files = files)
+        return form
+
+
+    def _create_container(self, name):
+        return TestContainer.objects.create(name = name)
+
+
+    def _add_element(self, container, orig_filename, dest_filename):
+        return container.test_elements.create(
+                the_file = File(self._get_sample_file(orig_filename), dest_filename)
+            )
+
+
+    def _create_unbound_test_element_form(self, container):
+        return TestElementForm(container = container)
+
+
+    def _create_bound_test_element_form(self, container, orig_filename = None,
+                                        dest_filename = None, content_type = None):
+        if orig_filename and dest_filename and content_type:
+            uploaded_file = SimpleUploadedFile(
+                    name = dest_filename,
+                    content = self._get_sample_file(orig_filename).read(),
+                    content_type = content_type,
+                )
+            files = {'the_file': uploaded_file}
+        else:
+            files = {}
+        form = TestElementForm(container = container, data = {}, files = files)
+        return form
 
