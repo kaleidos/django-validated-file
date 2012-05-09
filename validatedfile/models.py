@@ -32,3 +32,31 @@ class ValidatedFileField(models.FileField):
 
         return data
 
+
+class FileQuota(object):
+    def __init__(self, items = [], file_attr_name = None):
+        self.items = items
+        self.file_attr_name = file_attr_name
+
+    def current_usage(self):
+        usage = 0
+        for item in self.items:
+            the_file = getattr(item, self.file_attr_name, None)
+            if the_file:
+                usage += the_file.size
+        return usage
+
+class QuotaValidator(object):
+    def __init__(self, max_usage):
+        self.quota = FileQuota()
+        self.max_usage = max_usage
+
+    def set_quota(self, quota):
+        self.quota = quota
+
+    def __call__(self, file):
+        tried_usage = self.quota.current_usage() + file.size
+        if tried_usage > self.max_usage:
+            raise forms.ValidationError(_('Please keep the total uploaded files under %s. With this file, the total would be %s' %
+                                   (filesizeformat(self.max_usage), filesizeformat(tried_usage))))
+        

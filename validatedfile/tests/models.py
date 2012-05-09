@@ -1,5 +1,5 @@
 from django.db import models
-from validatedfile.models import ValidatedFileField
+from validatedfile.models import ValidatedFileField, QuotaValidator
 
 class TestModel(models.Model):
     the_file = ValidatedFileField(
@@ -14,4 +14,19 @@ class TestModelNoValidate(models.Model):
                     null = True,
                     blank = True,
                     upload_to = 'testfile')
+
+
+class TestContainer(models.Model):
+    name = models.CharField(max_length = 100)
+
+
+class TestElement(models.Model):
+    container = models.ForeignKey(
+                    TestContainer,
+                    related_name = 'test_elements')
+    the_file = ValidatedFileField(
+                    null = True,
+                    blank = True,
+                    upload_to = 'testfile',
+                    content_types = ['image/png', 'image/jpeg'])
 
