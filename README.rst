@@ -19,7 +19,7 @@ and a list of valid mime types that will be allowed. The list of all mime types 
 here: http://www.iana.org/assignments/media-types/index.html::
 
     from django.db import models
-    from validatedfile.models import ValidatedFileField
+    from validatedfile import ValidatedFileField
 
     class TestModel(models.Model):
         the_file = ValidatedFileField(
@@ -42,7 +42,7 @@ This example also checks the total size of all files uploaded by one user::
 
     from django.contrib.auth.models import User
     from django.db import models
-    from validatedfile.models import ValidatedFileField
+    from validatedfile import ValidatedFileField
 
     class TestModel(models.Model):
         user = models.ForeignKey(
@@ -60,7 +60,7 @@ This example also checks the total size of all files uploaded by one user::
     (in forms.py)
 
     from django import forms
-    from validatedfile.models import QuotaValidator
+    from validatedfile import QuotaValidator
     from models.py import TestModel
 
     class TestModelForm(models.ModelForm):

@@ -1,6 +1,6 @@
 from django import forms
 from models import TestModel, TestModelNoValidate, TestContainer, TestElement
-from validatedfile.models import QuotaValidator
+from validatedfile import QuotaValidator
 
 class TestModelForm(forms.ModelForm):
     
