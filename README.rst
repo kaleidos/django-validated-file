@@ -11,8 +11,8 @@ Installation
  * Note that this package depends on python-magic (to check field types).
  * Add 'validatedfile' to your INSTALLED_APPS in settings.py.
 
-Usage
------
+Validate single file
+--------------------
 
 Create a model and add a field of type ValidatedFileField. You can add a maximum size in bytes
 and a list of valid mime types that will be allowed. The list of all mime types is available
@@ -31,6 +31,62 @@ here: http://www.iana.org/assignments/media-types/index.html::
 
 The model can be used in forms or model forms like a normal FileField. If a user tries to upload
 a file with too much size or without a valid type, a form validation error will occur.
+
+
+Validate quota usage
+--------------------
+
+This example also checks the total size of all files uploaded by one user::
+
+    (in models.py)
+
+    from django.contrib.auth.models import User
+    from django.db import models
+    from validatedfile.models import ValidatedFileField
+
+    class TestModel(models.Model):
+        user = models.ForeignKey(
+                        User,
+                        null = False,
+                        blank = False,
+                        related_name = 'test_models')
+        the_file = ValidatedFileField(
+                        null = True,
+                        blank = True,
+                        upload_to = 'testfile',
+                        max_upload_size = 10240,
+                        content_types = ['image/png'])
+
+    (in forms.py)
+
+    from django import forms
+    from validatedfile.models import QuotaValidator
+    from models.py import TestModel
+
+    class TestModelForm(models.ModelForm):
+        the_file = forms.FileField(
+                        required = True,
+                        validators = [QuotaValidator(max_usage = 102400)])
+
+        class Meta:
+            model = TestModel
+            fields = ['the_file']
+
+        def __init__(self, user, *args, **kwargs):
+            super(TestModelForm, self).__init__(*args, **kwargs)
+            self.user = user
+            self.fields['the_file'].validators[0].update_quota(
+                    items = self.user.test_models.all(),
+                    attr_name = 'the_file',
+                )
+
+        def exceeds_quota(self):
+            return self.fields['the_file'].validators[0].quota.exceeds()
+
+        def save(self, *args, **kwargs):
+            model = super(TestModelForm, self).save(commit = False)
+            model.user = self.user
+            model.save()
 
 
 Note on DOS attacks

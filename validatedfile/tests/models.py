@@ -1,5 +1,5 @@
 from django.db import models
-from validatedfile.models import ValidatedFileField, QuotaValidator
+from validatedfile.models import ValidatedFileField
 
 class TestModel(models.Model):
     the_file = ValidatedFileField(
