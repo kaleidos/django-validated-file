@@ -4,6 +4,9 @@
 from setuptools import setup, find_packages
 import validatedfile
 
+import os # To avoid an error importing validatedfile for versiontools
+os.environ['DJANGO_SETTINGS_MODULE'] = 'testing.settings'
+
 setup(
     name = 'django-validated-file',
     version = ":versiontools:validatedfile:",
