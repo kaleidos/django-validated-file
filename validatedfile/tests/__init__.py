@@ -187,6 +187,44 @@ class ValidatedFileFieldTest(TestCase):
         container.delete()
 
 
+    def test_quota_near_limit(self):
+        quota = FileQuota(max_usage = 6500)
+
+        container = self._create_container(name = 'container1')
+        quota.update(container.test_elements.all(), 'the_file')
+        self.assertEqual(quota.current_usage, 0)
+        self.assertFalse(quota.near_limit())
+
+        element1 = self._add_element(container = container,
+                                    orig_filename = 'image2k.png',
+                                    dest_filename = 'the_file.png')
+        quota.update(container.test_elements.all(), 'the_file')
+        self.assertEqual(quota.current_usage, 2120)
+        self.assertFalse(quota.near_limit())
+
+        element2 = self._add_element(container = container,
+                                    orig_filename = 'image2k.png',
+                                    dest_filename = 'the_file.png')
+        quota.update(container.test_elements.all(), 'the_file')
+        self.assertEqual(quota.current_usage, 4240)
+        self.assertFalse(quota.near_limit())
+
+        element3 = self._add_element(container = container,
+                                    orig_filename = 'image2k.png',
+                                    dest_filename = 'the_file.png')
+        quota.update(container.test_elements.all(), 'the_file')
+        self.assertEqual(quota.current_usage, 6360)
+        self.assertTrue(quota.near_limit())
+
+        element1.the_file.delete()
+        element2.the_file.delete()
+        element3.the_file.delete()
+        element1.delete()
+        element2.delete()
+        element3.delete()
+        container.delete()
+
+
     def test_form_quota_check(self):
         container = self._create_container(name = 'container1')
 
