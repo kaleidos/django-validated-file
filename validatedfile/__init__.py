@@ -25,12 +25,13 @@ class ValidatedFileField(models.FileField):
             file.seek(0)
 
             if not content_type_headers in self.content_types or not content_type_magic in self.content_types:
-                raise forms.ValidationError(_('Filetype %s not supported.') % (content_type_magic))
+                raise forms.ValidationError(_('Files of type %(type)s are not supported.') % {'type': content_type_magic})
 
         if self.max_upload_size:
             if file._size > self.max_upload_size:
-                raise forms.ValidationError(_('Please keep filesize under %s. Current filesize %s') %
-                                            (filesizeformat(self.max_upload_size), filesizeformat(file._size)))
+                raise forms.ValidationError(_('Files of size greater than %(max_size)s are not allowed. Your file is %(current_size)s') %
+                                            {'max_size': filesizeformat(self.max_upload_size),
+                                             'current_size': filesizeformat(file._size)})
 
         return data
 
@@ -69,7 +70,7 @@ class QuotaValidator(object):
     def __call__(self, file):
         file_size = file.size
         if self.quota.exceeds(file_size):
-            raise forms.ValidationError(_('Please keep the total uploaded files under %s. With this file, the total would be %s' %
-                                   (filesizeformat(self.quota.max_usage),
-                                    filesizeformat(self.quota.current_usage + file_size))))
+            raise forms.ValidationError(_('Please keep the total uploaded files under %(total_size)s. With this file, the total would be %(exceed_size)s.' %
+                                   {'total_size': filesizeformat(self.quota.max_usage),
+                                    'exceed_size': filesizeformat(self.quota.current_usage + file_size)}))
  
