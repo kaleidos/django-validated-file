@@ -54,8 +54,8 @@ class FileQuota(object):
         else:
             return False
 
-    def near_limit(self):
-        return (float(self.current_usage) / float(self.max_usage)) > 0.8
+    def near_limit(self, limit_threshold = 0.8):
+        return (float(self.current_usage) / float(self.max_usage)) > limit_threshold
 
 
 class QuotaValidator(object):
