@@ -18,6 +18,9 @@ setup(
     url = 'https://github.com/kaleidos/django-validated-file',
     license = 'GPL3',
     include_package_data = True,
+    package_data = {
+        '': ['*.po', '*.mo'],
+    },
     packages = find_packages(),
     install_requires=[
         'distribute',
