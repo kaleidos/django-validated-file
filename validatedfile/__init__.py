@@ -1,4 +1,4 @@
-__version__ = (0, 0, 1, "final", 0)
+__version__ = (1, 0, 0, "final", 0)
 
 from django.db import models
 from django import forms
@@ -13,7 +13,7 @@ class ValidatedFileField(models.FileField):
         self.max_upload_size = kwargs.pop("max_upload_size", 0)
         super(ValidatedFileField, self).__init__(*args, **kwargs)
 
-    def clean(self, *args, **kwargs):        
+    def clean(self, *args, **kwargs):
         data = super(ValidatedFileField, self).clean(*args, **kwargs)
         file = data.file
 
@@ -47,7 +47,10 @@ class FileQuota(object):
         for item in items:
             the_file = getattr(item, attr_name, None)
             if the_file:
-                self.current_usage += the_file.size
+                try:
+                    self.current_usage += the_file.size
+                except AttributeError:
+                    pass # Protect against the inconsistence of that the file has been deleted in storage but still is in the field
 
     def exceeds(self, size = 0):
         if self.max_usage >= 0:

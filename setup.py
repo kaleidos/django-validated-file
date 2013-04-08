@@ -10,7 +10,7 @@ import validatedfile
 setup(
     name = 'django-validated-file',
     version = ":versiontools:validatedfile:",
-    description = "This Django app adds two field types, ValidatedFileField and ValidatedImageField, that add the capability of checking the document size and types the user may send.",
+    description = "This Django app adds a new field type, ValidatedFileField, that add the capability of checking the document size and types the user may send.",
     long_description = "",
     keywords = 'django, filefield, validation',
     author = u'Andrés Moya Velázquez',
@@ -32,7 +32,7 @@ setup(
     ],
     classifiers = [
         "Programming Language :: Python",
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Framework :: Django',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
