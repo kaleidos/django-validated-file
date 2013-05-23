@@ -7,6 +7,7 @@ from django.utils.translation import ugettext as _
 
 import magic
 
+
 class ValidatedFileField(models.FileField):
     def __init__(self, *args, **kwargs):
         self.content_types = kwargs.pop("content_types", [])
@@ -18,16 +19,20 @@ class ValidatedFileField(models.FileField):
         file = data.file
 
         if self.content_types:
-            content_type_headers = getattr(file, 'content_type', '')
+            uploaded_content_type = getattr(file, 'content_type', '')
 
-            mg = magic.Magic(mime = True)
-            content_type_magic = mg.from_buffer(file.read(1024))
+            mg = magic.Magic(mime=True)
+            content_type_magic = mg.from_buffer(file.read())
             file.seek(0)
 
-            if not content_type_headers in self.content_types or not content_type_magic in self.content_types:
+            # Prefere mime-type instead mime-type from http header
+            if uploaded_content_type != content_type_magic:
+                uploaded_content_type = content_type_magic
+
+            if not uploaded_content_type in self.content_types:
                 raise forms.ValidationError(_('Files of type %(type)s are not supported.') % {'type': content_type_magic})
 
-        if self.max_upload_size:
+        if self.max_upload_size and hasattr(file, '_size'):
             if file._size > self.max_upload_size:
                 raise forms.ValidationError(_('Files of size greater than %(max_size)s are not allowed. Your file is %(current_size)s') %
                                             {'max_size': filesizeformat(self.max_upload_size),
@@ -76,4 +81,4 @@ class QuotaValidator(object):
             raise forms.ValidationError(_('Please keep the total uploaded files under %(total_size)s. With this file, the total would be %(exceed_size)s.' %
                                    {'total_size': filesizeformat(self.quota.max_usage),
                                     'exceed_size': filesizeformat(self.quota.current_usage + file_size)}))
- 
+
