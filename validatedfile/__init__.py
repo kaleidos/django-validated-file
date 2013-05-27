@@ -12,6 +12,7 @@ class ValidatedFileField(models.FileField):
     def __init__(self, *args, **kwargs):
         self.content_types = kwargs.pop("content_types", [])
         self.max_upload_size = kwargs.pop("max_upload_size", 0)
+        self.mime_lookup_length = kwargs.pop("mime_lookup_length", 4096)
         super(ValidatedFileField, self).__init__(*args, **kwargs)
 
     def clean(self, *args, **kwargs):
@@ -22,7 +23,9 @@ class ValidatedFileField(models.FileField):
             uploaded_content_type = getattr(file, 'content_type', '')
 
             mg = magic.Magic(mime=True)
-            content_type_magic = mg.from_buffer(file.read())
+            content_type_magic = mg.from_buffer(
+                file.read(self.mime_lookup_length)
+            )
             file.seek(0)
 
             # Prefere mime-type instead mime-type from http header
