@@ -7,12 +7,12 @@ import os.path
 
 from validatedfile import FileQuota
 
-from models import TestModel, TestModelNoValidate, TestContainer, TestElement
-from forms import TestModelForm, TestModelNoValidateForm, TestElementForm
+from testing.models import TestModel, TestModelNoValidate, TestContainer, TestElement
+from testing.forms import TestModelForm, TestModelNoValidateForm, TestElementForm
 
 class ValidatedFileFieldTest(TestCase):
 
-    SAMPLE_FILES_PATH = 'validatedfile/tests/sample_files'
+    SAMPLE_FILES_PATH = 'testing/sample_files'
 
 
     def test_create_empty_instance(self):
@@ -287,7 +287,7 @@ class ValidatedFileFieldTest(TestCase):
         url = os.path.join(settings.MEDIA_URL, filefield.field.upload_to, filename)
         self.assertEqual(filefield.url, url)
 
-        
+
     def _get_file_url(self, filename):
         return os.path.join(MEDIA_ROOT, prefix, filename)
 
