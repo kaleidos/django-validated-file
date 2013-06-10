@@ -3,9 +3,9 @@ python:
   - "2.6"
   - "2.7"
 install:
-  - pip install -e . --use-mirrors
   - pip install django --use-mirrors
   - pip install python-magic --use-mirrors
+  - pip install -e . --use-mirrors
   - pip install coveralls --use-mirrors
 script:
   - coverage run --source=validatedfile runtests.py
