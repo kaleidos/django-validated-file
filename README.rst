@@ -1,6 +1,19 @@
 django-validated-file
 =====================
 
+.. image:: https://travis-ci.org/kaleidos/django-validated-file.png?branch=master
+    :target: https://travis-ci.org/kaleidos/django-validated-file
+
+.. image:: https://coveralls.io/repos/kaleidos/django-validated-file/badge.png?branch=master
+    :target: https://coveralls.io/r/kaleidos/django-validated-file?branch=master
+
+.. image:: https://pypip.in/v/django-validated-file/badge.png
+    :target: https://crate.io/packages/django-validated-file
+
+.. image:: https://pypip.in/d/django-validated-file/badge.png
+    :target: https://crate.io/packages/django-validated-file
+
+
 This Django app adds a new field type, ValidatedFileField, that add the
 capability of checking the document size and types the user may send.
 
