@@ -51,7 +51,7 @@ class ValidatedFileFieldTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertEqual(len(form.errors), 1)
         self.assertEqual(len(form.errors['the_file']), 1)
-        self.assertEqual(form.errors['the_file'][0], u'Please keep filesize under 10.0 KB. Current filesize 14.2 KB')
+        self.assertEqual(form.errors['the_file'][0], u'Files of size greater than 10.0 KB are not allowed. Your file is 14.2 KB')
 
 
     def test_form_invalid_filetype(self):
@@ -62,7 +62,7 @@ class ValidatedFileFieldTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertEqual(len(form.errors), 1)
         self.assertEqual(len(form.errors['the_file']), 1)
-        self.assertEqual(form.errors['the_file'][0], u'Filetype application/pdf not supported.')
+        self.assertEqual(form.errors['the_file'][0], u'Files of type application/pdf are not supported.')
 
 
     def test_form_invalid_filetype_and_size(self):
@@ -73,7 +73,7 @@ class ValidatedFileFieldTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertEqual(len(form.errors), 1)
         self.assertEqual(len(form.errors['the_file']), 1)
-        self.assertEqual(form.errors['the_file'][0], u'Filetype application/pdf not supported.')
+        self.assertEqual(form.errors['the_file'][0], u'Files of type application/pdf are not supported.')
 
 
     def test_form_fake_filetype(self):
@@ -84,7 +84,7 @@ class ValidatedFileFieldTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertEqual(len(form.errors), 1)
         self.assertEqual(len(form.errors['the_file']), 1)
-        self.assertEqual(form.errors['the_file'][0], u'Filetype application/pdf not supported.')
+        self.assertEqual(form.errors['the_file'][0], u'Files of type application/pdf are not supported.')
 
 
     def test_form_no_validate(self):
@@ -269,7 +269,7 @@ class ValidatedFileFieldTest(TestCase):
         self.assertEqual(len(form.errors), 1)
         self.assertEqual(len(form.errors['the_file']), 1)
         self.assertEqual(form.errors['the_file'][0],
-                u'Please keep the total uploaded files under 9.8 KB. With this file, the total would be 16.3 KB')
+                u'Please keep the total uploaded files under 9.8 KB. With this file, the total would be 16.3 KB.')
 
         element.the_file.delete()
         element.delete()
