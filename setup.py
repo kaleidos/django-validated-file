@@ -1,11 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os # To avoid an error importing validatedfile for versiontools
-os.environ['DJANGO_SETTINGS_MODULE'] = 'testing.settings'
-
 from setuptools import setup, find_packages
-import validatedfile
 
 setup(
     name = 'django-validated-file',

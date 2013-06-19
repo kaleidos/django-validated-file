@@ -5,7 +5,7 @@ from django.conf import settings
 
 import os.path
 
-from validatedfile import FileQuota
+from validatedfile.fields import FileQuota
 
 from testing.models import TestModel, TestModelNoValidate, TestContainer, TestElement
 from testing.forms import TestModelForm, TestModelNoValidateForm, TestElementForm

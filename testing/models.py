@@ -1,5 +1,5 @@
 from django.db import models
-from validatedfile import ValidatedFileField
+from validatedfile.fields import ValidatedFileField
 
 class TestModel(models.Model):
     the_file = ValidatedFileField(
