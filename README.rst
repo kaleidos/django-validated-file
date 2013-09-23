@@ -32,7 +32,7 @@ and a list of valid mime types that will be allowed. The list of all mime types 
 here: http://www.iana.org/assignments/media-types/index.html::
 
     from django.db import models
-    from validatedfile import ValidatedFileField
+    from validatedfile.fields import ValidatedFileField
 
     class TestModel(models.Model):
         the_file = ValidatedFileField(
@@ -55,7 +55,7 @@ This example also checks the total size of all files uploaded by one user::
 
     from django.contrib.auth.models import User
     from django.db import models
-    from validatedfile import ValidatedFileField
+    from validatedfile.fields import ValidatedFileField
 
     class TestModel(models.Model):
         user = models.ForeignKey(
@@ -73,7 +73,7 @@ This example also checks the total size of all files uploaded by one user::
     (in forms.py)
 
     from django import forms
-    from validatedfile import QuotaValidator
+    from validatedfile.fields import QuotaValidator
     from models.py import TestModel
 
     class TestModelForm(models.ModelForm):
@@ -117,5 +117,5 @@ it depends on the software you are using. For example, if you use apache, you sh
 This is a complementary measure, because you'll usually want normal users that exceed the size by a
 reasonable amount to get a friendly form validation message, while attacking users will see how their
 connection is abruptly cut before the file finishes uploading. So the recommended setting is to give
-max_upload_size a small value (e.g. 5Mb) and LimitRequestBody a higher one (e.g. 100Mb).
+`max_upload_size` a small value (e.g. 5Mb) and `LimitRequestBody` a higher one (e.g. 100Mb).
 
