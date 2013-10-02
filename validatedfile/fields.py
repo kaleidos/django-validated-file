@@ -87,3 +87,19 @@ class QuotaValidator(object):
                 _('Please keep the total uploaded files under %(total_size)s. With this file, the total would be %(exceed_size)s.' %
                 {'total_size': filesizeformat(self.quota.max_usage), 'exceed_size': filesizeformat(self.quota.current_usage + file_size)})
             )
+
+try:
+    from south.modelsinspector import add_introspection_rules
+    add_introspection_rules([
+        (
+            [ValidatedFileField],
+            [],
+            {
+                "content_types": ["content_types", {"default": []}],
+                "max_upload_size": ["max_upload_size", {"default": 0}],
+                "mime_lookup_length": ["mime_lookup_length", {"default": 4096}],
+            },
+        ),
+    ], ["^validatedfile\.fields\.ValidatedFileField"])
+except ImportError:
+    pass
