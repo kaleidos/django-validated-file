@@ -12,7 +12,7 @@ setup(
     author = u'Andrés Moya Velázquez',
     author_email = 'andres.moya@kaleidos.net',
     url = 'https://github.com/kaleidos/django-validated-file',
-    license = 'GPL3',
+    license = 'BSD',
     include_package_data = True,
     package_data = {
         '': ['*.po', '*.mo'],
@@ -31,7 +31,7 @@ setup(
         'Development Status :: 5 - Production/Stable',
         'Framework :: Django',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
+        'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
         'Topic :: Internet :: WWW/HTTP',
     ]
