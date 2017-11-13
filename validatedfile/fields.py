@@ -22,7 +22,7 @@ class ValidatedFileField(models.FileField):
             uploaded_content_type = getattr(file, 'content_type', '')
 
             magic_file_path = getattr(settings, "MAGIC_FILE_PATH", None)
-            if (magic_file_path):
+            if magic_file_path:
                 mg = magic.Magic(mime=True, magic_file=magic_file_path)
             else:
                 mg = magic.Magic(mime=True)
