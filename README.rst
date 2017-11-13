@@ -22,6 +22,7 @@ Installation
 
  * Download and install package with python setup.py install.
  * Note that this package depends on python-magic (to check field types).
+ * For windows, you must download the files at https://github.com/pidydx/libmagicwin64, add them to C:\Windows\System32, and set MAGIC_FILE_PATH="..." in your settings.py.
  * Add 'validatedfile' to your INSTALLED_APPS in settings.py.
 
 Validate single file
