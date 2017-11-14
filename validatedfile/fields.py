@@ -2,6 +2,7 @@ from django.db import models
 from django import forms
 from django.template.defaultfilters import filesizeformat
 from django.utils.translation import ugettext as _
+from django.conf import settings
 
 import magic
 
@@ -20,7 +21,11 @@ class ValidatedFileField(models.FileField):
         if self.content_types:
             uploaded_content_type = getattr(file, 'content_type', '')
 
-            mg = magic.Magic(mime=True)
+            magic_file_path = getattr(settings, "MAGIC_FILE_PATH", None)
+            if magic_file_path:
+                mg = magic.Magic(mime=True, magic_file=magic_file_path)
+            else:
+                mg = magic.Magic(mime=True)
             content_type_magic = mg.from_buffer(
                 file.read(self.mime_lookup_length)
             )
