@@ -17,6 +17,10 @@ django-validated-file
 This Django app adds a new field type, ValidatedFileField, that add the
 capability of checking the document size and types the user may send.
 
+**NOTE**: there is a fork of this utility, at https://github.com/mbourqui/django-constrainedfilefield,
+that is more maintained and updated, and adds some nice features like a javascript validator. We recommend
+using ConstrainedFileField instead of ValidatedFile.
+
 Installation
 ------------
 
