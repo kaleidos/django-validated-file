@@ -7,10 +7,10 @@ django-validated-file
 .. image:: https://coveralls.io/repos/kaleidos/django-validated-file/badge.png?branch=master
     :target: https://coveralls.io/r/kaleidos/django-validated-file?branch=master
 
-.. image:: https://pypip.in/v/django-validated-file/badge.png
+.. image:: https://img.shields.io/pypi/v/django-validated-file.svg
     :target: https://crate.io/packages/django-validated-file
 
-.. image:: https://pypip.in/d/django-validated-file/badge.png
+.. image:: https://img.shields.io/pypi/dm/django-validated-file.svg
     :target: https://crate.io/packages/django-validated-file
 
 
